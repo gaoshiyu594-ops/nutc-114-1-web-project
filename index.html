@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐱 貓咪天氣預報站 - 臺中市</title>
+    <style>
+        /* --- 🎨 貓咪風格 CSS 設計 --- */
+
+        /* 導入可愛字體 */
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap');
+
+        :root {
+            /* 貓咪主題色盤 */
+            --cat-pink: #FFC0CB; /* 貓掌肉球粉 */
+            --cat-yellow: #FFD700; /* 貓眼金 */
+            --cat-blue: #ADD8E6; /* 清爽藍天 */
+            --cat-dark: #333333; /* 文字深色 */
+            --cat-light: #FFFFFF; /* 背景亮色 */
+            --cat-accent: #FFA07A; /* 重點鮭魚橘 */
+            --current-bg: var(--cat-accent);
+            --current-text: var(--cat-light);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+            background-color: var(--cat-blue);
+            color: var(--cat-dark);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            gap: 20px;
+        }
+
+        /* 標題區塊 */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--cat-light);
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: var(--cat-dark);
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: var(--cat-dark);
+        }
+
+        /* 主天氣預報區塊 (當前時段) */
+        #current-weather {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--current-bg);
+            color: var(--current-text);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative; /* 為了 "當前時段" 標籤 */
+            border: 3px solid var(--cat-dark); /* 突出邊框 */
+        }
+
+        .current-tag {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background-color: var(--cat-yellow);
+            color: var(--cat-dark);
+            padding: 5px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1em;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 當前時段 ICON 放大與動畫 */
+        #current-weather .weather-icon {
+            font-size: 5em; /* 超大 ICON */
+            margin: 10px 0;
+            display: inline-block;
+            animation: pulse 2s infinite; /* 脈衝動畫 */
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        #current-weather .time-period {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        #current-weather .weather-text {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        #current-weather .temp-rain-comfort {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 15px;
+            flex-wrap: wrap; /* RWD 換行 */
+            gap: 10px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 100px;
+        }
+
+        .detail-item .label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 3px;
+        }
+
+        .detail-item .value {
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+
+        /* 未來時段區塊 */
+        #future-forecasts {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .forecast-card {
+            display: flex;
+            align-items: center;
+            background-color: var(--cat-light);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            border: 2px solid var(--cat-pink);
+        }
+
+        .forecast-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .forecast-card .weather-icon {
+            font-size: 2.5em; /* ICON 較小但仍醒目 */
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .forecast-info {
+            flex-grow: 1;
+        }
+
+        .forecast-info .time-period {
+            font-weight: 700;
+            font-size: 1.2em;
+            color: var(--cat-accent);
+            margin-bottom: 3px;
+        }
+
+        .forecast-details {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 5px;
+            font-size: 0.95em;
+        }
+
+        .forecast-details span {
+            display: block;
+        }
+
+        .forecast-details .temp {
+            font-weight: 700;
+            color: var(--cat-dark);
+        }
+
+        /* RWD 響應式設計 */
+        @media (max-width: 650px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            #current-weather {
+                padding: 20px;
+            }
+
+            #current-weather .weather-icon {
+                font-size: 4em;
+            }
+
+            #current-weather .time-period {
+                font-size: 1.5em;
+            }
+
+            #current-weather .weather-text {
+                font-size: 1.3em;
+            }
+
+            .detail-item .value {
+                font-size: 1.1em;
+            }
+
+            .forecast-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .forecast-card .weather-icon {
+                margin-bottom: 5px;
+            }
+
+            .forecast-info {
+                width: 100%;
+            }
+
+            .forecast-details {
+                justify-content: space-around;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>臺中市 🌤️</h1>
+        <p>🐱 貓咪主題天氣預報站</p>
+    </div>
+
+    <div id="current-weather">
+        <p>資料載入中...</p>
+    </div>
+
+    <div id="future-forecasts">
+        </div>
+
+    <script>
+        // --- 💻 JavaScript 功能實現 ---
+        const API_URL = 'https://nutc-web-vic-peng.zeabur.app/api/weather/kaohsiung';
+        const currentWeatherDiv = document.getElementById('current-weather');
+        const futureForecastsDiv = document.getElementById('future-forecasts');
+
+        /**
+         * 根據天氣狀況文字，返回對應的可愛 emoji 圖標。
+         * @param {string} weatherText 天氣狀況描述
+         * @returns {string} emoji 圖標
+         */
+        function getWeatherIcon(weatherText) {
+            if (weatherText.includes('晴')) return '☀️';
+            if (weatherText.includes('多雲') || weatherText.includes('陰')) return '☁️';
+            if (weatherText.includes('雨') && weatherText.includes('雷')) return '⛈️';
+            if (weatherText.includes('雨')) return '🌧️';
+            if (weatherText.includes('雪')) return '❄️';
+            if (weatherText.includes('霧')) return '🌫️';
+            return '🐾'; // 預設貓咪腳印
+        }
+
+        /**
+         * 根據時間判斷時段描述 (早晨, 下午, 晚上)。
+         * @param {Date} date 時間對象
+         * @returns {string} 時段描述
+         */
+        function getPeriodDescription(date) {
+            const hour = date.getHours();
+            if (hour >= 5 && hour < 12) return '🌞 早晨';
+            if (hour >= 12 && hour < 18) return '😸 下午';
+            return '🌙 晚上';
+        }
+
+        /**
+         * 判斷給定的預報時段是否為當前時段。
+         * 判斷邏輯：目前時間在 startTime 和 endTime 之間。
+         * @param {object} forecast 預報物件
+         * @returns {boolean} 是否為當前時段
+         */
+        function isCurrentPeriod(forecast) {
+            const now = new Date();
+            const start = new Date(forecast.startTime);
+            const end = new Date(forecast.endTime);
+
+            // 檢查 now 是否在 [start, end) 區間內
+            return now >= start && now < end;
+        }
+
+        /**
+         * 渲染單一預報時段的 HTML 內容。
+         * @param {object} forecast 預報物件
+         * @param {number} index 索引值
+         * @returns {string} HTML 字符串
+         */
+        function renderForecast(forecast, index) {
+            const isCurrent = isCurrentPeriod(forecast);
+            const date = new Date(forecast.startTime);
+            const periodText = getPeriodDescription(date);
+            const icon = getWeatherIcon(forecast.weather);
+            const minTemp = forecast.minTemp.replace('°C', '');
+            const maxTemp = forecast.maxTemp.replace('°C', '');
+            const tempRange = `${minTemp}° ~ ${maxTemp}°C`;
+
+            if (isCurrent) {
+                // 當前時段 - 使用 #current-weather 的大區塊樣式
+                currentWeatherDiv.innerHTML = `
+                    <div class="current-tag">⚡ 當前時段</div>
+                    <div class="weather-icon">${icon}</div>
+                    <div class="time-period">${periodText}</div>
+                    <div class="weather-text">**${forecast.weather}**</div>
+                    <div class="temp-rain-comfort">
+                        <div class="detail-item">
+                            <span class="label">🌡️ 溫差</span>
+                            <span class="value">${tempRange}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">💧 降雨機率</span>
+                            <span class="value">${forecast.rain}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">🛋️ 舒適度</span>
+                            <span class="value">${forecast.comfort}</span>
+                        </div>
+                    </div>
+                `;
+                return null; // 不渲染為未來時段卡片
+            } else {
+                // 未來時段 - 使用 .forecast-card 的小卡片樣式
+                return `
+                    <div class="forecast-card">
+                        <div class="weather-icon">${icon}</div>
+                        <div class="forecast-info">
+                            <div class="time-period">${periodText}</div>
+                            <div class="forecast-details">
+                                <span class="weather">${forecast.weather}</span>
+                                <span class="temp">🌡️ ${tempRange}</span>
+                                <span class="rain">💧 ${forecast.rain}</span>
+                                <span class="comfort">${forecast.comfort}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * 獲取並渲染天氣資料。
+         */
+        async function fetchAndRenderWeather() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP 錯誤! 狀態碼: ${response.status}`);
+                }
+                const json = await response.json();
+                const forecasts = json.data.forecasts;
+                
+                if (!forecasts || forecasts.length === 0) {
+                    currentWeatherDiv.innerHTML = '<p>抱歉，無法取得天氣預報資料 😿</p>';
+                    return;
+                }
+
+                let futureHtml = '';
+                let currentFound = false;
+
+                forecasts.forEach((forecast, index) => {
+                    const html = renderForecast(forecast, index);
+                    
+                    if (isCurrentPeriod(forecast)) {
+                        currentFound = true;
+                    } else if (html) {
+                        futureHtml += html;
+                    }
+                });
+
+                // 處理所有預報都不是當前時段的情況 (理論上不太可能，但預防萬一)
+                if (!currentFound && forecasts.length > 0) {
+                    // 如果沒找到當前時段，則將第一個時段作為預設當前時段
+                    renderForecast(forecasts[0], 0);
+                    // 重新建構未來時段（從第二個開始）
+                    futureHtml = '';
+                    for (let i = 1; i < forecasts.length; i++) {
+                         futureHtml += renderForecast(forecasts[i], i);
+                    }
+                }
+                
+                futureForecastsDiv.innerHTML = futureHtml;
+
+                // 更新標題城市名稱
+                document.querySelector('.header h1').textContent = `${json.data.city} 🌤️`;
+
+            } catch (error) {
+                console.error('獲取天氣資料失敗:', error);
+                currentWeatherDiv.innerHTML = `<p>載入天氣資料時發生錯誤：${error.message} 🐾</p>`;
+            }
+        }
+
+        // 啟動功能
+        fetchAndRenderWeather();
+    </script>
+</body>
+</html>
